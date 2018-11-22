@@ -14,18 +14,20 @@ def lambda_handler(event, context):
             gen = target['backup_gen']
             EC2_CLIENT.create_snapshot(VolumeId=volume_id, Description=desc)
 
-            snapshots = EC2_CLIENT.describe_snapshots(
-                Filters=[{'Name': 'description', 'Values': [desc]}]
-            )['Snapshots']
+            snapshots = EC2_CLIENT.describe_snapshots(Filters=[{
+                'Name': 'description',
+                'Values': [desc]
+            }])['Snapshots']
 
             for target in sorted(snapshots, key=lambda s: s['StartTime'])[:-gen]:
                 EC2_CLIENT.delete_snapshot(SnapshotId=target['SnapshotId'])
 
 
 def get_target_instances():
-    reservations = EC2_CLIENT.describe_instances(
-        Filters=[{'Name': 'tag-key', 'Values': [TARGET_TAG]}]
-    )['Reservations']
+    reservations = EC2_CLIENT.describe_instances(Filters=[{
+        'Name': 'tag-key',
+        'Values': [TARGET_TAG]
+    }])['Reservations']
 
     res = []
     for reservation in reservations:
